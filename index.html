@@ -30,7 +30,7 @@
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
   .card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;}
   .card .thumb{height:90px;background:linear-gradient(135deg,#2a3040,#171a24);
-    display:flex;align-items:center;justify-content:center;font-size:32px;position:relative;}
+    display:flex;align-items:center;justify-content:center;font-size:32px;position:relative;overflow:hidden;}
   .card .heart{position:absolute;top:8px;right:8px;font-size:16px;opacity:.8;}
   .card .tag{position:absolute;top:8px;left:8px;background:var(--blue);color:#fff;
     font-size:10px;padding:2px 6px;border-radius:6px;}
@@ -47,7 +47,7 @@
   /* Детальный экран */
   .back{background:none;border:none;color:var(--text);font-size:20px;margin-bottom:12px;}
   .gallery{height:220px;border-radius:16px;background:linear-gradient(135deg,#2a3040,#171a24);
-    display:flex;align-items:center;justify-content:center;font-size:64px;position:relative;margin-bottom:10px;}
+    display:flex;align-items:center;justify-content:center;font-size:64px;position:relative;margin-bottom:10px;overflow:hidden;}
   .gallery .count{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.5);
     color:#fff;font-size:11px;padding:3px 8px;border-radius:8px;}
   .thumbs{display:flex;gap:6px;margin-bottom:16px;}
@@ -165,8 +165,11 @@
       const el = document.createElement("div");
       el.className = "card";
       el.onclick = () => openCar(i);
+      const thumbContent = c.image
+        ? `<img src="${c.image}" style="width:100%;height:100%;object-fit:cover;">`
+        : c.icon;
       el.innerHTML = `
-        <div class="thumb">${c.icon}<span class="tag">Выгодно</span><span class="heart">🤍</span></div>
+        <div class="thumb">${thumbContent}<span class="tag">Выгодно</span><span class="heart">🤍</span></div>
         <div class="info">
           <p class="name">${c.name}</p>
           <p class="meta">${c.meta}</p>
@@ -189,7 +192,10 @@
     document.getElementById("dPrice").textContent = current.price;
     document.getElementById("dOld").textContent = current.old;
     document.getElementById("dSave").textContent = current.save;
-    document.getElementById("galleryMain").innerHTML = current.icon + '<span class="count">1/5</span>';
+    const galleryContent = current.image
+      ? `<img src="${current.image}" style="width:100%;height:100%;object-fit:cover;border-radius:16px;">`
+      : current.icon;
+    document.getElementById("galleryMain").innerHTML = galleryContent + '<span class="count">1/5</span>';
 
     const thumbs = document.getElementById("thumbs");
     thumbs.innerHTML = "";
