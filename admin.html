@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AutoLeadRu — Админка</title>
+<style>
+  :root{
+    --bg:#0b0e14; --card:#131722; --border:#232838;
+    --blue:#2f7bff; --text:#f3f5f9; --muted:#8b93a7; --red:#ef4444;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,sans-serif;padding:16px;max-width:700px;margin:0 auto;}
+  h1{font-size:18px;margin:0 0 4px;}
+  .hint{color:var(--muted);font-size:12px;margin-bottom:16px;}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;position:relative;}
+  .card .icon{font-size:32px;text-align:center;margin-bottom:8px;}
+  .card .name{font-size:13px;font-weight:600;margin:0 0 2px;}
+  .card .meta{font-size:11px;color:var(--muted);margin:0 0 6px;}
+  .card .price{font-size:13px;font-weight:700;}
+  .card .actions{display:flex;gap:6px;margin-top:8px;}
+  .card button{flex:1;border:none;border-radius:8px;padding:6px;font-size:11px;cursor:pointer;}
+  .btn-edit{background:#1a1f2e;color:var(--text);}
+  .btn-delete{background:rgba(239,68,68,.15);color:var(--red);}
+
+  .add-btn{display:block;width:100%;background:var(--blue);color:#fff;border:none;
+    border-radius:14px;padding:14px;font-size:15px;font-weight:600;margin-bottom:16px;cursor:pointer;}
+
+  .export-btn{display:block;width:100%;background:#1a1f2e;border:1px solid var(--border);color:var(--text);
+    border-radius:14px;padding:14px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:8px;}
+  .export-note{font-size:11px;color:var(--muted);text-align:center;line-height:1.5;}
+
+  /* Модалка добавления/редактирования */
+  .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:16px;}
+  .modal.active{display:flex;}
+  .modal-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;width:100%;max-width:400px;}
+  .modal-box h3{margin:0 0 12px;font-size:15px;}
+  .modal-box input{width:100%;background:#0b0e14;border:1px solid var(--border);color:var(--text);
+    border-radius:10px;padding:10px;font-size:13px;margin-bottom:8px;}
+  .modal-box label{font-size:11px;color:var(--muted);display:block;margin-bottom:4px;}
+  .modal-actions{display:flex;gap:8px;margin-top:8px;}
+  .modal-actions button{flex:1;border:none;border-radius:10px;padding:10px;font-size:13px;cursor:pointer;}
+  .btn-save{background:var(--blue);color:#fff;}
+  .btn-cancel{background:#1a1f2e;color:var(--text);}
+</style>
+</head>
+<body>
+
+<h1>🛠️ Управление каталогом</h1>
+<p class="hint">Добавляй, редактируй или удаляй машины. В конце нажми «Скачать data.json» и перезалей его на GitHub.</p>
+
+<button class="add-btn" onclick="openModal()">➕ Добавить машину</button>
+
+<div class="grid" id="grid"></div>
+
+<button class="export-btn" onclick="exportData()">⬇️ Скачать data.json</button>
+<p class="export-note">Скачанный файл нужно загрузить на GitHub вместо старого data.json (просто перетащить в репозиторий и нажать Commit changes) — тогда каталог у всех обновится.</p>
+
+<!-- Модальное окно -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h3 id="modalTitle">Добавить машину</h3>
+    <label>Эмодзи-иконка (например 🚗)</label>
+    <input id="fIcon" placeholder="🚗">
+    <label>Название</label>
+    <input id="fName" placeholder="BMW X5 (G05)">
+    <label>Характеристики</label>
+    <input id="fMeta" placeholder="2020 · 3.0 дизель · 58 000 км">
+    <label>Цена</label>
+    <input id="fPrice" placeholder="2 350 000 ₽">
+    <label>Старая цена (зачёркнутая)</label>
+    <input id="fOld" placeholder="2 900 000 ₽">
+    <label>Экономия</label>
+    <input id="fSave" placeholder="550 000 ₽">
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Отмена</button>
+      <button class="btn-save" onclick="saveCar()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let cars = [];
+  let editIndex = null;
+
+  // Загружаем текущие данные из data.json
+  fetch('./data.json').then(r => r.json()).then(data => { cars = data; render(); });
+
+  function render(){
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    cars.forEach((c, i) => {
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.innerHTML = `
+        <div class="icon">${c.icon}</div>
+        <p class="name">${c.name}</p>
+        <p class="meta">${c.meta}</p>
+        <p class="price">${c.price}</p>
+        <div class="actions">
+          <button class="btn-edit" onclick="editCar(${i})">✏️ Изменить</button>
+          <button class="btn-delete" onclick="deleteCar(${i})">🗑️ Удалить</button>
+        </div>`;
+      grid.appendChild(el);
+    });
+  }
+
+  function openModal(){
+    editIndex = null;
+    document.getElementById('modalTitle').textContent = 'Добавить машину';
+    ['fIcon','fName','fMeta','fPrice','fOld','fSave'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('modal').classList.add('active');
+  }
+
+  function editCar(i){
+    editIndex = i;
+    const c = cars[i];
+    document.getElementById('modalTitle').textContent = 'Изменить машину';
+    document.getElementById('fIcon').value = c.icon;
+    document.getElementById('fName').value = c.name;
+    document.getElementById('fMeta').value = c.meta;
+    document.getElementById('fPrice').value = c.price;
+    document.getElementById('fOld').value = c.old;
+    document.getElementById('fSave').value = c.save;
+    document.getElementById('modal').classList.add('active');
+  }
+
+  function deleteCar(i){
+    if(confirm('Удалить эту машину из каталога?')){
+      cars.splice(i, 1);
+      render();
+    }
+  }
+
+  function closeModal(){
+    document.getElementById('modal').classList.remove('active');
+  }
+
+  function saveCar(){
+    const car = {
+      icon: document.getElementById('fIcon').value || '🚗',
+      name: document.getElementById('fName').value,
+      meta: document.getElementById('fMeta').value,
+      price: document.getElementById('fPrice').value,
+      old: document.getElementById('fOld').value,
+      save: document.getElementById('fSave').value,
+    };
+    if(editIndex === null){
+      cars.push(car);
+    } else {
+      cars[editIndex] = car;
+    }
+    closeModal();
+    render();
+  }
+
+  function exportData(){
+    const blob = new Blob([JSON.stringify(cars, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'data.json';
+    a.click();
+  }
+</script>
+</body>
+</html>
