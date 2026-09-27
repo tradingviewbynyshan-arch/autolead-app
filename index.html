@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AutoLeadRu — Каталог</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --bg:#0b0e14; --card:#131722; --card2:#1a1f2e; --border:#232838;
+    --blue:#2f7bff; --text:#f3f5f9; --muted:#8b93a7; --green:#22c55e;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,sans-serif;}
+  .screen{display:none;padding:16px;padding-bottom:90px;}
+  .screen.active{display:block;}
+
+  .banner{background:linear-gradient(135deg,#1a1f2e,#0b0e14);border:1px solid var(--border);
+    border-radius:16px;padding:16px;margin-bottom:16px;}
+  .banner h2{margin:0 0 6px;font-size:17px;}
+  .banner p{margin:0;color:var(--muted);font-size:13px;}
+
+  .badges{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+  .badge{background:var(--card);border:1px solid var(--border);border-radius:12px;
+    padding:10px 4px;text-align:center;font-size:11px;color:var(--muted);}
+  .badge .ic{font-size:18px;display:block;margin-bottom:4px;}
+
+  .section-title{font-size:15px;font-weight:600;margin:0 0 12px;display:flex;align-items:center;gap:6px;}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;}
+  .card .thumb{height:90px;background:linear-gradient(135deg,#2a3040,#171a24);
+    display:flex;align-items:center;justify-content:center;font-size:32px;position:relative;}
+  .card .heart{position:absolute;top:8px;right:8px;font-size:16px;opacity:.8;}
+  .card .tag{position:absolute;top:8px;left:8px;background:var(--blue);color:#fff;
+    font-size:10px;padding:2px 6px;border-radius:6px;}
+  .card .info{padding:10px;}
+  .card .name{font-size:13px;font-weight:600;margin:0 0 4px;}
+  .card .meta{font-size:11px;color:var(--muted);margin:0 0 6px;}
+  .card .price{font-size:14px;font-weight:700;}
+  .card .old{font-size:11px;color:var(--muted);text-decoration:line-through;margin-left:4px;}
+
+  .cta{display:block;width:100%;background:var(--blue);color:#fff;border:none;
+    border-radius:14px;padding:14px;font-size:15px;font-weight:600;text-align:center;}
+  .footnote{text-align:center;color:var(--muted);font-size:11px;margin-top:10px;}
+
+  /* Детальный экран */
+  .back{background:none;border:none;color:var(--text);font-size:20px;margin-bottom:12px;}
+  .gallery{height:220px;border-radius:16px;background:linear-gradient(135deg,#2a3040,#171a24);
+    display:flex;align-items:center;justify-content:center;font-size:64px;position:relative;margin-bottom:10px;}
+  .gallery .count{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.5);
+    color:#fff;font-size:11px;padding:3px 8px;border-radius:8px;}
+  .thumbs{display:flex;gap:6px;margin-bottom:16px;}
+  .thumbs div{width:48px;height:48px;border-radius:8px;background:var(--card2);
+    display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid transparent;}
+  .thumbs div.active{border-color:var(--blue);}
+
+  .car-title{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:700;margin-bottom:2px;}
+  .car-title .tag{background:var(--blue);color:#fff;font-size:10px;padding:2px 8px;border-radius:8px;}
+  .car-sub{color:var(--muted);font-size:13px;margin-bottom:14px;}
+  .price-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+  .price-row .price{font-size:24px;font-weight:800;}
+  .price-row .old{color:var(--muted);text-decoration:line-through;font-size:14px;}
+  .save{margin-left:auto;background:var(--card);border:1px solid var(--border);
+    border-radius:10px;padding:6px 10px;font-size:11px;color:var(--muted);text-align:right;}
+  .save b{display:block;color:var(--green);font-size:13px;}
+
+  .specs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+  .spec{background:var(--card);border:1px solid var(--border);border-radius:12px;
+    padding:8px 4px;text-align:center;font-size:10px;color:var(--muted);}
+  .spec b{display:block;color:var(--text);font-size:11px;margin-top:2px;}
+
+  .desc-title{font-size:12px;color:var(--muted);letter-spacing:.05em;margin-bottom:6px;}
+  .desc{font-size:13px;line-height:1.5;color:#d6dae3;margin-bottom:18px;}
+
+  .dealer{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);
+    border-radius:14px;padding:12px;margin-bottom:12px;}
+  .dealer .ok{color:var(--green);font-size:18px;}
+  .dealer .d1{font-size:13px;font-weight:600;}
+  .dealer .d2{font-size:11px;color:var(--muted);}
+  .dealer button{margin-left:auto;background:var(--card2);border:1px solid var(--border);
+    color:var(--text);border-radius:10px;padding:8px 12px;font-size:12px;}
+</style>
+</head>
+<body>
+
+<!-- ЭКРАН 1: КАТАЛОГ -->
+<div class="screen active" id="catalog">
+  <div class="banner">
+    <h2>🇰🇬 Автомобили из Кыргызстана</h2>
+    <p>Найди выгодную цену. Сравни с РФ. Свяжись с продавцом.</p>
+  </div>
+
+  <div class="badges">
+    <div class="badge"><span class="ic">✅</span>Актуальные цены</div>
+    <div class="badge"><span class="ic">🏢</span>Проверенные автосалоны</div>
+    <div class="badge"><span class="ic">📞</span>Прямой контакт</div>
+    <div class="badge"><span class="ic">🚫</span>Без комиссий</div>
+  </div>
+
+  <div class="section-title">🚘 Популярные авто</div>
+  <div class="grid" id="grid"></div>
+
+  <button class="cta" onclick="tg.close()">🔍 Выбрать автомобиль ›</button>
+  <div class="footnote">Более 500+ авто в базе · Обновление цен ежедневно</div>
+</div>
+
+<!-- ЭКРАН 2: КАРТОЧКА МАШИНЫ -->
+<div class="screen" id="detail">
+  <button class="back" onclick="showCatalog()">‹</button>
+
+  <div class="gallery" id="galleryMain">🚗<span class="count" id="galleryCount">1/5</span></div>
+  <div class="thumbs" id="thumbs"></div>
+
+  <div class="car-title"><span id="dName"></span><span class="tag">Выгодно</span></div>
+  <div class="car-sub" id="dSub"></div>
+
+  <div class="price-row">
+    <div class="price" id="dPrice"></div>
+    <div class="old" id="dOld"></div>
+    <div class="save">Экономия<b id="dSave"></b></div>
+  </div>
+
+  <div class="specs">
+    <div class="spec">🔧<b>3.0 дизель</b></div>
+    <div class="spec">⚙️<b>Полный</b></div>
+    <div class="spec">🎛️<b>Автомат</b></div>
+    <div class="spec">🚙<b>Внедорожник</b></div>
+  </div>
+
+  <div class="desc-title">ОПИСАНИЕ</div>
+  <div class="desc">Автомобиль в отличном состоянии, не бит, не крашен. Полная комплектация, оригинальный пробег. Растаможен, готов к оформлению.</div>
+
+  <div class="dealer">
+    <span class="ok">✅</span>
+    <div>
+      <div class="d1">Проверенный автосалон</div>
+      <div class="d2">Бишкек, Кыргызстан</div>
+    </div>
+    <button onclick="contactDealer()">✈️ Связаться</button>
+  </div>
+
+  <button class="cta" onclick="selectCar()">Выбрать и перейти к оплате ›</button>
+</div>
+
+<script>
+  const tg = window.Telegram ? window.Telegram.WebApp : { ready(){}, close(){}, sendData(){} };
+  tg.ready();
+  tg.expand && tg.expand();
+
+  // 🧪 Демо-данные — замени на реальные объявления (можно подгружать с сервера бота)
+  const cars = [
+    {icon:"🚙", name:"BMW X5 (G05)", meta:"2020 · 3.0 дизель · 58 000 км", price:"2 350 000 ₽", old:"2 900 000 ₽", save:"550 000 ₽"},
+    {icon:"🚐", name:"Toyota Land Cruiser 300", meta:"2021 · 3.5 бензин · 42 000 км", price:"5 200 000 ₽", old:"6 200 000 ₽", save:"1 000 000 ₽"},
+    {icon:"🚗", name:"Mercedes-Benz E 200", meta:"2021 · 2.0 бензин · 36 000 км", price:"3 100 000 ₽", old:"3 700 000 ₽", save:"600 000 ₽"},
+    {icon:"🚘", name:"Lexus RX 350", meta:"2020 · 3.5 бензин · 50 000 км", price:"3 450 000 ₽", old:"4 200 000 ₽", save:"750 000 ₽"},
+  ];
+
+  const grid = document.getElementById("grid");
+  cars.forEach((c, i) => {
+    const el = document.createElement("div");
+    el.className = "card";
+    el.onclick = () => openCar(i);
+    el.innerHTML = `
+      <div class="thumb">${c.icon}<span class="tag">Выгодно</span><span class="heart">🤍</span></div>
+      <div class="info">
+        <p class="name">${c.name}</p>
+        <p class="meta">${c.meta}</p>
+        <p class="price">${c.price}<span class="old">${c.old}</span></p>
+      </div>`;
+    grid.appendChild(el);
+  });
+
+  function showCatalog(){
+    document.getElementById("catalog").classList.add("active");
+    document.getElementById("detail").classList.remove("active");
+  }
+
+  let current = null;
+  function openCar(i){
+    current = cars[i];
+    document.getElementById("dName").textContent = current.name;
+    document.getElementById("dSub").textContent = current.meta;
+    document.getElementById("dPrice").textContent = current.price;
+    document.getElementById("dOld").textContent = current.old;
+    document.getElementById("dSave").textContent = current.save;
+    document.getElementById("galleryMain").innerHTML = current.icon + '<span class="count">1/5</span>';
+
+    const thumbs = document.getElementById("thumbs");
+    thumbs.innerHTML = "";
+    for(let n=0;n<5;n++){
+      const t = document.createElement("div");
+      t.textContent = current.icon;
+      if(n===0) t.className = "active";
+      thumbs.appendChild(t);
+    }
+
+    document.getElementById("catalog").classList.remove("active");
+    document.getElementById("detail").classList.add("active");
+  }
+
+  function contactDealer(){
+    // Замени username на реальный контакт салона
+    tg.openTelegramLink ? tg.openTelegramLink("https://t.me/your_dealer_username")
+                         : window.open("https://t.me/your_dealer_username");
+  }
+
+  function selectCar(){
+    // Отправляет выбор обратно в бота (в Python это придёт в message.web_app_data)
+    tg.sendData(JSON.stringify({ action: "select_car", car: current.name }));
+    tg.close();
+  }
+</script>
+</body>
+</html>
